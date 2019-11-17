@@ -5,11 +5,22 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)
 
 LOGS_TABLE = os.environ['LOGS_TABLE']
-client = boto3.client('dynamodb')
+IS_OFFLINE = os.environ.get('IS_OFFLINE')
+
+if IS_OFFLINE:
+    client = boto3.client(
+        'dynamodb',
+        region_name='localhost',
+        endpoint_url='http://localhost:8000'
+    )
+else:
+    client = boto3.client('dynamodb')
+
 
 @app.route("/")
 def hello():
     return "Hello World!"
+
 
 @app.route("/logs/<string:log_id>")
 def get_log(log_id):

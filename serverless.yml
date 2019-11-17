@@ -3,6 +3,7 @@ service: serverless-flask
 plugins:
   - serverless-python-requirements
   - serverless-wsgi
+  - serverless-dynamodb-local
 
 custom:
   tableName: 'logs-table-${self:provider.stage}'
@@ -11,6 +12,11 @@ custom:
     packRequirements: false
   pythonRequirements:
     dockerisePip: non-linux
+  dynamodb:
+    start:
+      migrate: true
+    stages:
+      - dev
 
 provider:
   name: aws
