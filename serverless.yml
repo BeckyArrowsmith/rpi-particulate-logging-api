@@ -5,6 +5,7 @@ plugins:
   - serverless-wsgi
 
 custom:
+  tableName: 'logs-table-${self:provider.stage}'
   wsgi:
     app: app.app
     packRequirements: false
@@ -16,10 +17,41 @@ provider:
   runtime: python3.7
   stage: dev
   region: eu-west-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+         - { "Fn::GetAtt": ["LogsTableDynamoDBTable", "Arn" ] }
+  environment:
+    LOGS_TABLE: ${self:custom.tableName}
 
 functions:
   app: 
-    handler: wsgi.handler
+    handler: wsgi_handler.handler
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
+
+resources:
+  Resources:
+    LogsTableDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: logId
+            AttributeType: S
+        KeySchema:
+         - 
+          AttributeName: logId
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.tableName}

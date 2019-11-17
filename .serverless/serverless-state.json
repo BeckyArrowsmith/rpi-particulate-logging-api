@@ -10,6 +10,30 @@
       "name": "aws",
       "runtime": "python3.7",
       "region": "eu-west-2",
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:Query",
+            "dynamodb:Scan",
+            "dynamodb:GetItem",
+            "dynamodb:PutItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:DeleteItem"
+          ],
+          "Resource": [
+            {
+              "Fn::GetAtt": [
+                "LogsTableDynamoDBTable",
+                "Arn"
+              ]
+            }
+          ]
+        }
+      ],
+      "environment": {
+        "LOGS_TABLE": "logs-table-dev"
+      },
       "versionFunctions": true,
       "remoteFunctionData": null,
       "compiledCloudFormationTemplate": {
@@ -127,6 +151,9 @@
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*:*"
                           }
                         ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
                       }
                     ]
                   }
@@ -155,7 +182,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/serverless-flask/dev/1573993487784-2019-11-17T12:24:47.784Z/serverless-flask.zip"
+                "S3Key": "serverless/serverless-flask/dev/1573997886140-2019-11-17T13:38:06.140Z/serverless-flask.zip"
               },
               "FunctionName": "serverless-flask-dev-app",
               "Handler": "wsgi_handler.handler",
@@ -167,21 +194,26 @@
                 ]
               },
               "Runtime": "python3.7",
-              "Timeout": 6
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "LOGS_TABLE": "logs-table-dev"
+                }
+              }
             },
             "DependsOn": [
               "AppLogGroup",
               "IamRoleLambdaExecution"
             ]
           },
-          "AppLambdaVersionqnK8wm7g8e5lFwIvrJKqML8Bh6bMsEX5hTpPcQ3aM": {
+          "AppLambdaVersionuGqHo4T6ocNzteYN6yy789CwECIsGQH0b1PnmF7Gxw": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AppLambdaFunction"
               },
-              "CodeSha256": "rjHiKd3qAFugsEp5lgX+Uf/xCXb8HsW+9gV6WHnfU5U="
+              "CodeSha256": "yPo4MbHQ9HE0JA4u7ylpfzrLF+17rgPBnFuPUJxr38E="
             }
           },
           "ApiGatewayRestApi": {
@@ -299,7 +331,7 @@
               "MethodResponses": []
             }
           },
-          "ApiGatewayDeployment1573993481923": {
+          "ApiGatewayDeployment1573997876150": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -348,6 +380,28 @@
                 ]
               }
             }
+          },
+          "LogsTableDynamoDBTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "logId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "logId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TableName": "logs-table-dev"
+            }
           }
         },
         "Outputs": {
@@ -359,7 +413,7 @@
           "AppLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AppLambdaVersionqnK8wm7g8e5lFwIvrJKqML8Bh6bMsEX5hTpPcQ3aM"
+              "Ref": "AppLambdaVersionuGqHo4T6ocNzteYN6yy789CwECIsGQH0b1PnmF7Gxw"
             }
           },
           "ServiceEndpoint": {
@@ -453,6 +507,7 @@
       "vpc": {}
     },
     "custom": {
+      "tableName": "logs-table-dev",
       "wsgi": {
         "app": "app.app",
         "packRequirements": false
@@ -485,12 +540,39 @@
         "vpc": {}
       }
     },
+    "resources": {
+      "Resources": {
+        "LogsTableDynamoDBTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "logId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "logId",
+                "KeyType": "HASH"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            },
+            "TableName": "logs-table-dev"
+          }
+        }
+      },
+      "Outputs": {}
+    },
     "serviceFilename": "serverless.yml",
     "layers": {},
     "artifact": "/home/becky/Code/particulate-api/.serverless/serverless-flask.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/serverless-flask/dev/1573993487784-2019-11-17T12:24:47.784Z",
+    "artifactDirectoryName": "serverless/serverless-flask/dev/1573997886140-2019-11-17T13:38:06.140Z",
     "artifact": "serverless-flask.zip"
   }
 }
