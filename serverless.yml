@@ -17,6 +17,7 @@ custom:
       migrate: true
     stages:
       - dev
+      - prod
 
 provider:
   name: aws
@@ -36,13 +37,45 @@ provider:
          - { "Fn::GetAtt": ["LogsTableDynamoDBTable", "Arn" ] }
   environment:
     LOGS_TABLE: ${self:custom.tableName}
+  apiKeys:
+  - ${self:provider.stage}-apiKey
+  usagePlan:
+  quota:
+    limit: 1000
+    offset: 2
+    period: MONTH
+  throttle:
+    burstLimit: 100
+    rateLimit: 10
+
+
 
 functions:
   app: 
     handler: wsgi_handler.handler
     events:
-      - http: ANY /
-      - http: 'ANY {proxy+}'
+      - http: 
+          path: /
+          method: any 
+          private: true
+      - http: 
+          path: /{proxy+}
+          method: any
+          private: true 
+    # getLog:
+    #   handler: wsgi_handler.handler
+    #   events:
+    #     - http:
+    #       path: /logs
+    #       method: get
+    #       private: true
+    # createLog:
+    #   handler: wsgi_handler.handler
+    #   events:
+    #     - http: 
+    #         path: /logs
+    #         method: post
+    #         private: true
 
 resources:
   Resources:
