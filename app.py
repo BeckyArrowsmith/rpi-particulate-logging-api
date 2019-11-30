@@ -4,8 +4,8 @@ import boto3
 from flask import Flask, jsonify, request
 app = Flask(__name__)
 
-LOGS_TABLE = os.environ['LOGS_TABLE']
-IS_OFFLINE = os.environ.get('IS_OFFLINE')
+LOGS_TABLE = os.environ.get('LOGS_TABLE', [])
+IS_OFFLINE = os.environ.get('IS_OFFLINE',  True)
 
 if IS_OFFLINE:
     client = boto3.client(
@@ -19,7 +19,7 @@ else:
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return "Nothing to see here."
 
 
 @app.route("/logs/<string:log_id>")
